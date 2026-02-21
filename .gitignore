@@ -1,0 +1,37 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Node
+node_modules/
+.pnpm-store/
+.yarn/
+.claude
+docs
+
+
+# Builds
+.dist/
+dist/
+build/
+.next/
+
+# Env
+.env
+.env.*
+
+# Logs
+*.log
+
+# IDE / tooling
+.vscode/
+.idea/
+.cursor/
+.windsurf/rules/agents.md
+.windsurf/rules/coding-style.md
+.windsurf/rules/git-workflow.md
+.windsurf/rules/hooks.md
+.windsurf/rules/patterns.md
+
+# Repo-specific
+scripts/
