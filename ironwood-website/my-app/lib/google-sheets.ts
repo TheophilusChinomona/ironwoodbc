@@ -7,14 +7,16 @@ function getAuth() {
   const serviceAccountKey = process.env.GOOGLE_SERVICE_ACCOUNT_KEY;
 
   if (!serviceAccountKey) {
-    throw new Error("GOOGLE_SERVICE_ACCOUNT_KEY environment variable is not set");
+    console.warn("GOOGLE_SERVICE_ACCOUNT_KEY not set; Google Sheets logging is disabled.");
+    return null;
   }
 
   let credentials;
   try {
     credentials = JSON.parse(serviceAccountKey);
   } catch {
-    throw new Error("Invalid GOOGLE_SERVICE_ACCOUNT_KEY format");
+    console.warn("Invalid GOOGLE_SERVICE_ACCOUNT_KEY format; Google Sheets logging is disabled.");
+    return null;
   }
 
   const auth = new google.auth.GoogleAuth({
@@ -28,11 +30,18 @@ function getAuth() {
 export async function appendToSheet(formData: CallbackFormData) {
   const spreadsheetId = process.env.GOOGLE_SHEETS_ID;
 
+  // In production, we want the form to succeed even if Sheets logging isn't configured.
   if (!spreadsheetId) {
-    throw new Error("GOOGLE_SHEETS_ID environment variable is not set");
+    console.warn("GOOGLE_SHEETS_ID not set; skipping Google Sheets append.");
+    return { success: true, skipped: true } as const;
   }
 
   const auth = getAuth();
+  if (!auth) {
+    // Auth not available -> treat as a soft no-op so the user-facing form still works.
+    return { success: true, skipped: true } as const;
+  }
+
   const sheets = google.sheets({ version: "v4", auth });
 
   const timestamp = new Date().toISOString();
