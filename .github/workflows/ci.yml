@@ -45,7 +45,13 @@ jobs:
       - name: Trigger Dokploy redeploy
         working-directory: ${{ github.workspace }}
         run: |
-          curl -s -f -X POST "https://panel.theochinomona.tech/api/trpc/application.deploy" \
+          RESPONSE=$(curl -s -w "\nHTTP_STATUS:%{http_code}" -X POST "https://panel.theochinomona.tech/api/trpc/application.deploy" \
             -H "Content-Type: application/json" \
             -H "x-api-key: ${{ secrets.DOKPLOY_API_KEY }}" \
-            -d '{"json":{"applicationId":"g9H3njg1-vNp3eHMIuP-3"}}'
+            -d '{"json":{"applicationId":"g9H3njg1-vNp3eHMIuP-3"}}')
+          echo "$RESPONSE"
+          HTTP_STATUS=$(echo "$RESPONSE" | grep "HTTP_STATUS:" | cut -d: -f2)
+          if [ "$HTTP_STATUS" -lt 200 ] || [ "$HTTP_STATUS" -ge 300 ]; then
+            echo "Deploy failed with status $HTTP_STATUS"
+            exit 1
+          fi
