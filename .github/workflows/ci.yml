@@ -35,3 +35,16 @@ jobs:
 
       - name: Build
         run: npm run build
+
+  deploy:
+    name: Deploy to Dokploy
+    needs: lint-and-build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    steps:
+      - name: Trigger Dokploy redeploy
+        run: |
+          curl -s -f -X POST "https://panel.theochinomona.tech/api/trpc/application.deploy" \
+            -H "Content-Type: application/json" \
+            -H "x-api-key: ${{ secrets.DOKPLOY_API_KEY }}" \
+            -d '{"json":{"applicationId":"g9H3njg1-vNp3eHMIuP-3"}}'
