@@ -43,6 +43,7 @@ jobs:
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
       - name: Trigger Dokploy redeploy
+        working-directory: ${{ github.workspace }}
         run: |
           curl -s -f -X POST "https://panel.theochinomona.tech/api/trpc/application.deploy" \
             -H "Content-Type: application/json" \
