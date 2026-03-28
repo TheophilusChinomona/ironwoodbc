@@ -1,5 +1,6 @@
 import { google } from "googleapis";
 import { CallbackFormData } from "./validations/callback-form";
+import pool from "./db";
 
 const SCOPES = ["https://www.googleapis.com/auth/spreadsheets"];
 
@@ -25,6 +26,23 @@ function getAuth() {
   });
 
   return auth;
+}
+
+export async function saveSubmission(formData: CallbackFormData) {
+  await pool.query(
+    `INSERT INTO callback_submissions (full_name, phone, email, client_type, service, best_time, message)
+     VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+    [
+      formData.fullName,
+      formData.phone,
+      formData.email || null,
+      formData.clientType,
+      formData.service,
+      formData.bestTime,
+      formData.message || null,
+    ]
+  );
+  return { success: true };
 }
 
 export async function appendToSheet(formData: CallbackFormData) {

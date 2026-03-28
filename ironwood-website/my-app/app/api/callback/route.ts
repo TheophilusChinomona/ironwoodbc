@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { callbackFormSchema } from "@/lib/validations/callback-form";
-import { appendToSheet } from "@/lib/google-sheets";
+import { saveSubmission, appendToSheet } from "@/lib/google-sheets";
 import { sendCallbackEmail } from "@/lib/email";
 
 export async function POST(request: NextRequest) {
@@ -30,30 +30,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Run both operations in parallel
-    const [sheetResult, emailResult] = await Promise.allSettled([
+    // Run all three operations in parallel — DB save is primary, others are best-effort
+    const [dbResult, sheetResult, emailResult] = await Promise.allSettled([
+      saveSubmission(result.data),
       appendToSheet(result.data),
       sendCallbackEmail(result.data)
     ]);
 
-    // Log any failures but don't fail the request
+    // DB save failure is a hard error
+    if (dbResult.status === "rejected") {
+      console.error("Failed to save submission to database:", dbResult.reason);
+      return NextResponse.json(
+        { success: false, message: "Failed to process request. Please try again later." },
+        { status: 500 }
+      );
+    }
+
     if (sheetResult.status === "rejected") {
       console.error("Failed to append to Google Sheets:", sheetResult.reason);
     }
 
     if (emailResult.status === "rejected") {
       console.error("Failed to send email:", emailResult.reason);
-    }
-
-    // If both failed, return an error
-    if (sheetResult.status === "rejected" && emailResult.status === "rejected") {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Failed to process request. Please try again later."
-        },
-        { status: 500 }
-      );
     }
 
     return NextResponse.json(
