@@ -36,20 +36,5 @@ jobs:
       - name: Build
         run: npm run build
 
-  deploy:
-    name: Deploy to Dokploy
-    needs: lint-and-build
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    steps:
-      - name: Trigger Dokploy redeploy via SSH
-        uses: appleboy/ssh-action@v1.2.0
-        with:
-          host: 102.209.118.123
-          username: work
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            curl -s -f -X POST "http://localhost:3000/api/trpc/application.deploy" \
-              -H "Content-Type: application/json" \
-              -H "x-api-key: ${{ secrets.DOKPLOY_API_KEY }}" \
-              -d '{"json":{"applicationId":"g9H3njg1-vNp3eHMIuP-3"}}'
+# Production deployment is owned by Dokploy's GitHub App push webhook.
+# Keeper application: CTesSoBarlix-ID280r4P (clients-ironwoodbc-fb9uet).
