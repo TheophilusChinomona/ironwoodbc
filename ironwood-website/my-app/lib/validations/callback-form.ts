@@ -9,6 +9,7 @@ export const callbackFormSchema = z.object({
     .max(100, "Full name must not exceed 100 characters"),
   phone: z
     .string()
+    .overwrite((phone) => phone.replace(/[\s()-]/g, ""))
     .regex(phoneRegex, "Please enter a valid South African phone number (e.g., 0821234567 or +27821234567)"),
   email: z
     .string()

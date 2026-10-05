@@ -96,7 +96,7 @@ export default function IndustriesPage() {
                           variant="outline"
                           className="border-brand-300 text-brand-700 hover:bg-brand-50"
                         >
-                          <Link href="/contact">
+                          <Link href="/contact#callback">
                             Discuss Your Needs
                             <ArrowRight className="ml-2 h-4 w-4" />
                           </Link>
@@ -201,7 +201,7 @@ export default function IndustriesPage() {
               size="lg"
               className="bg-white text-brand-700 hover:bg-brand-50"
             >
-              <Link href="/contact">
+              <Link href="/contact#callback">
                 Get in Touch
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>

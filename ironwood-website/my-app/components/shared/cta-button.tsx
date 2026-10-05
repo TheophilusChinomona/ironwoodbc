@@ -13,7 +13,7 @@ interface CTAButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement>,
 }
 
 export function CTAButton({
-  href = "/contact",
+  href = "/contact#callback",
   variantType = "primary",
   className,
   ...props

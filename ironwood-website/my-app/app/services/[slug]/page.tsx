@@ -167,7 +167,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
                       asChild
                       className="w-full bg-brand-700 hover:bg-brand-800"
                     >
-                      <Link href="/contact">
+                      <Link href="#callback">
                         <Phone className="mr-2 h-4 w-4" />
                         Request a Callback
                       </Link>
@@ -215,7 +215,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
       </section>
 
       {/* Bottom CTA */}
-      <section className="py-16 md:py-20 lg:py-24 bg-slate-50">
+      <section id="callback" className="py-16 md:py-20 lg:py-24 bg-slate-50 scroll-mt-24">
         <Container>
           <div className="max-w-2xl mx-auto">
             <div className="text-center mb-8">
@@ -227,7 +227,7 @@ export default async function ServicePage({ params }: ServicePageProps) {
               </p>
             </div>
             <div className="bg-white rounded-xl shadow-lg p-6 md:p-8">
-              <CallbackForm />
+              <CallbackForm key={service.slug} defaultService={service.slug} />
             </div>
           </div>
         </Container>

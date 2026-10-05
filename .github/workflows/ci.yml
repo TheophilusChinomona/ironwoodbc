@@ -33,8 +33,17 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Unit tests
+        run: npm test
+
       - name: Build
         run: npm run build
+
+      - name: Install browser
+        run: npx playwright install --with-deps chromium
+
+      - name: Callback UX regression tests
+        run: npm run test:e2e
 
 # Production deployment is owned by Dokploy's GitHub App push webhook.
 # Keeper application: CTesSoBarlix-ID280r4P (clients-ironwoodbc-fb9uet).

@@ -138,7 +138,7 @@ export function Header() {
             variant="cta"
             className="bg-accent-blue hover:bg-accent-blue-dark text-white shadow-sm shadow-accent-blue/20"
           >
-            <Link href="/contact">
+            <Link href="/contact#callback">
               <Phone className="mr-2 h-4 w-4" />
               Request a Callback
             </Link>
@@ -227,7 +227,7 @@ export function Header() {
               variant="cta"
               className="w-full bg-accent-blue hover:bg-accent-blue-dark text-white"
             >
-              <Link href="/contact" onClick={() => setIsOpen(false)}>
+              <Link href="/contact#callback" onClick={() => setIsOpen(false)}>
                 <Phone className="mr-2 h-4 w-4" />
                 Request a Callback
               </Link>
