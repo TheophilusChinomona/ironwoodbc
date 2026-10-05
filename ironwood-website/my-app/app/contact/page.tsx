@@ -161,7 +161,7 @@ export default function ContactPage() {
             </div>
 
             {/* Right Column - Form */}
-            <div>
+            <div id="callback" className="min-w-0 scroll-mt-24">
               <Card className="shadow-lg border-accent-blue/20 bg-white">
                 <CardContent className="p-6 md:p-8">
                   <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-100">

@@ -48,7 +48,7 @@ export function Hero() {
               size="lg"
               className="bg-accent-blue hover:bg-accent-blue-dark text-white shadow-md"
             >
-              <Link href="/contact">
+              <Link href="/contact#callback">
                 <Phone className="mr-2 h-5 w-5" />
                 Request a Callback
               </Link>

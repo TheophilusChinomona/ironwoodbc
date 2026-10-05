@@ -152,7 +152,7 @@ export default function ServicesPage() {
               size="lg"
               className="bg-accent-blue hover:bg-accent-blue-dark text-white shadow-lg shadow-accent-blue/30"
             >
-              <Link href="/contact">
+              <Link href="/contact#callback">
                 Schedule a Free Consultation
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Link>

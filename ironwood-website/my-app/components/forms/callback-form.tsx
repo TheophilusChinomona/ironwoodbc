@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Phone, Loader2, CheckCircle } from "lucide-react";
@@ -23,7 +23,7 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
-import { toast } from "sonner";
+
 import {
   callbackFormSchema,
   type CallbackFormData,
@@ -33,9 +33,19 @@ import {
   popiaConsentText
 } from "@/lib/validations/callback-form";
 
-export function CallbackForm() {
+export function CallbackForm({ defaultService }: { defaultService?: string }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [hasSubmitError, setHasSubmitError] = useState(false);
+  const feedbackRef = useRef<HTMLDivElement>(null);
+  const parsedService = callbackFormSchema.shape.service.safeParse(defaultService);
+
+  useEffect(() => {
+    if (isSuccess || hasSubmitError) {
+      feedbackRef.current?.focus({ preventScroll: true });
+      feedbackRef.current?.scrollIntoView({ block: "center", behavior: "instant" });
+    }
+  }, [isSuccess, hasSubmitError]);
 
   const form = useForm<CallbackFormData>({
     resolver: zodResolver(callbackFormSchema),
@@ -44,7 +54,7 @@ export function CallbackForm() {
       phone: "",
       email: "",
       clientType: undefined,
-      service: undefined,
+      service: parsedService.success ? parsedService.data : undefined,
       bestTime: undefined,
       message: "",
       consent: false,
@@ -59,6 +69,7 @@ export function CallbackForm() {
     }
 
     setIsSubmitting(true);
+    setHasSubmitError(false);
 
     try {
       const response = await fetch("/api/callback", {
@@ -70,19 +81,17 @@ export function CallbackForm() {
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Failed to submit form");
+        throw new Error("Callback request failed");
+      }
+      const result = await response.json();
+      if (result?.success !== true) {
+        throw new Error("Callback request was not confirmed");
       }
 
       setIsSuccess(true);
-      toast.success("Request submitted successfully!", {
-        description: "We'll call you back during your preferred time."
-      });
       form.reset();
-    } catch (error) {
-      toast.error("Failed to submit request", {
-        description: error instanceof Error ? error.message : "Please try again later."
-      });
+    } catch {
+      setHasSubmitError(true);
     } finally {
       setIsSubmitting(false);
     }
@@ -90,7 +99,14 @@ export function CallbackForm() {
 
   if (isSuccess) {
     return (
-      <div className="bg-brand-50 border border-brand-200 rounded-lg p-8 text-center">
+      <div
+        ref={feedbackRef}
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        tabIndex={-1}
+        className="bg-brand-50 border border-brand-200 rounded-lg p-8 text-center scroll-mt-24 focus-visible:outline-2 focus-visible:outline-brand-700"
+      >
         <CheckCircle className="h-12 w-12 text-brand-600 mx-auto mb-4" />
         <h3 className="text-xl font-semibold text-brand-900 mb-2">
           Thank You!
@@ -114,7 +130,7 @@ export function CallbackForm() {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="min-w-0 space-y-6" aria-busy={isSubmitting}>
         {/* Honeypot field - hidden from users */}
         <div className="hidden" aria-hidden="true">
           <input
@@ -130,10 +146,10 @@ export function CallbackForm() {
             control={form.control}
             name="fullName"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="min-w-0">
                 <FormLabel>Full Name *</FormLabel>
                 <FormControl>
-                  <Input placeholder="John Doe" {...field} />
+                  <Input autoComplete="name" placeholder="John Doe" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -145,10 +161,10 @@ export function CallbackForm() {
             control={form.control}
             name="phone"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="min-w-0">
                 <FormLabel>Phone Number *</FormLabel>
                 <FormControl>
-                  <Input placeholder="0821234567 or +27821234567" {...field} />
+                  <Input type="tel" inputMode="tel" autoComplete="tel" placeholder="0821234567 or +27821234567" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -162,10 +178,10 @@ export function CallbackForm() {
             control={form.control}
             name="email"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="min-w-0">
                 <FormLabel>Email</FormLabel>
                 <FormControl>
-                  <Input type="email" placeholder="john@example.com" {...field} />
+                  <Input type="email" autoComplete="email" placeholder="john@example.com" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -177,11 +193,11 @@ export function CallbackForm() {
             control={form.control}
             name="clientType"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="min-w-0">
                 <FormLabel>I am a/an *</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select onValueChange={field.onChange} value={field.value ?? ""}>
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger className="w-full min-w-0 [&_[data-slot=select-value]]:min-w-0 [&_[data-slot=select-value]]:block [&_[data-slot=select-value]]:truncate">
                       <SelectValue placeholder="Select one" />
                     </SelectTrigger>
                   </FormControl>
@@ -205,11 +221,11 @@ export function CallbackForm() {
             control={form.control}
             name="service"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="min-w-0">
                 <FormLabel>Service Needed *</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select onValueChange={field.onChange} value={field.value ?? ""}>
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger className="w-full min-w-0 [&_[data-slot=select-value]]:min-w-0 [&_[data-slot=select-value]]:block [&_[data-slot=select-value]]:truncate">
                       <SelectValue placeholder="Select a service" />
                     </SelectTrigger>
                   </FormControl>
@@ -231,11 +247,11 @@ export function CallbackForm() {
             control={form.control}
             name="bestTime"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="min-w-0">
                 <FormLabel>Best Time to Call *</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select onValueChange={field.onChange} value={field.value ?? ""}>
                   <FormControl>
-                    <SelectTrigger>
+                    <SelectTrigger className="w-full min-w-0 [&_[data-slot=select-value]]:min-w-0 [&_[data-slot=select-value]]:block [&_[data-slot=select-value]]:truncate">
                       <SelectValue placeholder="Select time" />
                     </SelectTrigger>
                   </FormControl>
@@ -258,7 +274,7 @@ export function CallbackForm() {
           control={form.control}
           name="message"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="min-w-0">
               <FormLabel>Message (Optional)</FormLabel>
               <FormControl>
                 <Textarea
@@ -293,6 +309,17 @@ export function CallbackForm() {
             </FormItem>
           )}
         />
+
+        {hasSubmitError && (
+          <div
+            ref={feedbackRef}
+            role="alert"
+            tabIndex={-1}
+            className="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-800 scroll-mt-24 focus-visible:outline-2 focus-visible:outline-red-700"
+          >
+            We could not send your request. Your details are still here. Please try again.
+          </div>
+        )}
 
         <Button
           type="submit"
